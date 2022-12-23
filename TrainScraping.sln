@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.1321
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrainScraping", "TrainScraping\TrainScraping.csproj", "{BB4D4813-058A-4F47-9A21-D6FF784A01F7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrainScrapingService", "TrainScraping\TrainScrapingService.csproj", "{BB4D4813-058A-4F47-9A21-D6FF784A01F7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

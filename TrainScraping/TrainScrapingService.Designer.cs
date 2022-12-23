@@ -1,6 +1,6 @@
 ﻿namespace TrainScraping
 {
-    partial class Service1
+    partial class TrainScrapingService
     {
         /// <summary> 
         /// Erforderliche Designervariable.

@@ -17,7 +17,7 @@ namespace TrainScraping
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[]
             {
-                new Service1()
+                new TrainScrapingService()
             };
             ServiceBase.Run(ServicesToRun);
         }
