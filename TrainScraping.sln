@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.1321
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31005.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrainScrapingService", "TrainScrapingService\TrainScrapingService.csproj", "{BB4D4813-058A-4F47-9A21-D6FF784A01F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrainScrapingApi", "TrainScrapingApi\TrainScrapingApi.csproj", "{48F73C0C-3B5D-4E30-95E9-F17656C8F3B9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrainScrapingCommon", "TrainScrapingCommon\TrainScrapingCommon.csproj", "{E68030CC-7655-46EE-9CA5-486C740A5FBE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{BB4D4813-058A-4F47-9A21-D6FF784A01F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB4D4813-058A-4F47-9A21-D6FF784A01F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB4D4813-058A-4F47-9A21-D6FF784A01F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48F73C0C-3B5D-4E30-95E9-F17656C8F3B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48F73C0C-3B5D-4E30-95E9-F17656C8F3B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48F73C0C-3B5D-4E30-95E9-F17656C8F3B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48F73C0C-3B5D-4E30-95E9-F17656C8F3B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E68030CC-7655-46EE-9CA5-486C740A5FBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E68030CC-7655-46EE-9CA5-486C740A5FBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E68030CC-7655-46EE-9CA5-486C740A5FBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E68030CC-7655-46EE-9CA5-486C740A5FBE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
