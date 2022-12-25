@@ -8,6 +8,12 @@ namespace TrainScraping.Configuration
     {
         private static XmlSerializer serializer = new XmlSerializer(typeof(Config));
 
+        public string ApiBaseUrl { get; set; }
+
+        public string ApiToken { get; set; }
+        
+        public int DnyUploadIntervalSeconds { get; set; }
+
         public DnyScrapingConfig[] DNYs { get; set; }
 
         public static Config Load()

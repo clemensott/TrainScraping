@@ -12,6 +12,7 @@ namespace TrainScrapingApi.Controllers
         [HttpPost("dny")]
         public async Task<IActionResult> PostDny([FromBody] PostDnyBody body)
         {
+            if (!await this.IsAuthenticatedAsync()) return Unauthorized();
             await DnyHelper.Insert(body.Dny, body.Timestamp);
             return Ok();
         }

@@ -35,8 +35,10 @@ namespace TrainScrapingApi
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseHttpsRedirection();
+            else
+            {
+                app.UseHttpsRedirection();
+            }
 
             app.UseRouting();
             app.UseEndpoints(endpoints =>

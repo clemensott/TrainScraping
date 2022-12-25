@@ -67,7 +67,10 @@ namespace TrainScraping
 
         public void StartTimer()
         {
-            timer.Start();
+            if (timer.Interval > 0)
+            {
+                timer.Start();
+            }
         }
 
         private static string CreateSearchParam(DnySearchParamConfig param)
@@ -117,7 +120,7 @@ namespace TrainScraping
                             return;
                         }
 
-                        string path = Path.Combine(config.DownloadFolder, $"{DateTime.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss")}.json");
+                        string path = Path.Combine(config.DownloadFolder, $"{DateTime.UtcNow:yyyy-MM-ddTHH-mm-ss}.json");
                         string content = await result.Content.ReadAsStringAsync();
 
                         CreateDirectory();

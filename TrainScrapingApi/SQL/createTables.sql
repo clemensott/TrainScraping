@@ -1,4 +1,15 @@
-﻿CREATE TABLE dnys
+﻿CREATE TABLE users
+(
+    id       SERIAL        NOT NULL PRIMARY KEY,
+    token    VARCHAR(1024) NOT NULL,
+    disabled BOOLEAN       NOT NULL,
+    created  TIMESTAMP DEFAULT NULL
+);
+ALTER TABLE users
+    ALTER COLUMN created SET DEFAULT NOW();
+
+
+CREATE TABLE dnys
 (
     id            SERIAL        NOT NULL PRIMARY KEY,
     time          TIME          NOT NULL,

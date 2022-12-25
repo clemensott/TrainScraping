@@ -59,16 +59,6 @@ namespace TrainScrapingApi.Helpers
             return command;
         }
 
-        public static async Task<bool> AuthAsync(string token)
-        {
-            const string sql = "SELECT count(id) FROM users WHERE username = @token;";
-            KeyValueSet parameters = new KeyValueSet("token", token);
-
-            object scalar = await ExecuteScalarAsync(sql, parameters);
-
-            return scalar is int id ? id > 0 : false;
-        }
-
         public static async Task<int> ExecuteNonQueryAsync(string sql,
             IEnumerable<KeyValuePair<string, object>> parameters = null)
         {
