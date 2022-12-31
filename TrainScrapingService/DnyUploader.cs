@@ -22,13 +22,16 @@ namespace TrainScraping
             api = new API(config.ApiBaseUrl, config.ApiToken);
 
             timer = new Timer();
-            timer.Interval = config.DnyUploadIntervalSeconds * 1000;
             timer.Elapsed += Timer_Elapsed;
+            if (config.DnyUploadIntervalSeconds > 0)
+            {
+                timer.Interval = config.DnyUploadIntervalSeconds * 1000;
+            }
         }
 
         public void StartTimer()
         {
-            if (timer.Interval > 0)
+            if (config.DnyUploadIntervalSeconds > 0)
             {
                 timer.Start();
             }

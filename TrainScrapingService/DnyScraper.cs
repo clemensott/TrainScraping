@@ -24,7 +24,10 @@ namespace TrainScraping
         {
             timer = new Timer();
             timer.Elapsed += Timer_Elapsed;
-            timer.Interval = config.IntervalSeconds * 1000;
+            if (config.IntervalSeconds > 0)
+            {
+                timer.Interval = config.IntervalSeconds * 1000;
+            }
 
             this.config = config;
             client = CreateHttpClient(config);
@@ -67,7 +70,7 @@ namespace TrainScraping
 
         public void StartTimer()
         {
-            if (timer.Interval > 0)
+            if (config.IntervalSeconds > 0)
             {
                 timer.Start();
             }
@@ -96,7 +99,6 @@ namespace TrainScraping
 
         private void CreateDirectory()
         {
-            if (Directory.Exists(config.DownloadFolder)) return;
             Directory.CreateDirectory(config.DownloadFolder);
         }
 
