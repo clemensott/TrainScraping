@@ -1,4 +1,4 @@
-﻿namespace TrainScraping.Configuration
+﻿namespace TrainScrapingWorkerService.Configuration
 {
     public struct DnyHeaderConfig
     {

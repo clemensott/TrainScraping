@@ -1,43 +1,25 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Timers;
-using TrainScraping.Configuration;
+using TrainScrapingWorkerService.Configuration;
 using TrainScrapingCommon.Models;
 
-namespace TrainScraping
+namespace TrainScrapingWorkerService
 {
-    class DnyUploader : IDisposable
+    class DnyUploader : RegularTask
     {
         private readonly Config config;
         private readonly API api;
-        private readonly Timer timer;
+        private readonly ILogger logger;
 
-        public DnyUploader(Config config)
+        public DnyUploader(Config config, ILogger logger) : base(TimeSpan.FromSeconds(config.DnyUploadIntervalSeconds))
         {
             this.config = config;
+            this.logger = logger;
 
             api = new API(config.ApiBaseUrl, config.ApiToken);
-
-            timer = new Timer();
-            timer.Elapsed += Timer_Elapsed;
-            if (config.DnyUploadIntervalSeconds > 0)
-            {
-                timer.Interval = config.DnyUploadIntervalSeconds * 1000;
-            }
         }
 
-        public void StartTimer()
-        {
-            if (config.DnyUploadIntervalSeconds > 0)
-            {
-                timer.Start();
-            }
-        }
-
-        private string GetFirstFile(DnyScrapingConfig config)
+        private static string? GetFirstFile(DnyScrapingConfig config)
         {
             return Directory.EnumerateFiles(config.DownloadFolder).Where(path => path.EndsWith(".json")).FirstOrDefault();
         }
@@ -73,45 +55,45 @@ namespace TrainScraping
 
         public void MoveFileToArchive(DnyScrapingConfig config, string file)
         {
-            Logger.Log($"DnyUploader:MoveFileToArchive:{file}");
+            logger.LogInformation($"DnyUploader:MoveFileToArchive:{file}");
             MoveFile(file, config.ArchiveFolder);
         }
 
         public void MoveFileToError(DnyScrapingConfig config, string file)
         {
-            Logger.Log($"DnyUploader:MoveFileToError:{file}");
+            logger.LogInformation($"DnyUploader:MoveFileToError:{file}");
             MoveFile(file, config.ErrorFolder);
         }
 
-        public async Task UploadOne()
+        public override async Task Execute()
         {
             if (!await api.Ping())
             {
-                Logger.Log("DnyUploader:UploadOne:api_not_reachable");
+                logger.LogInformation("DnyUploader:UploadOne:api_not_reachable");
                 return;
             }
 
             foreach (DnyScrapingConfig dnyConfig in config.DNYs)
             {
-                string file = null;
+                string? file = null;
                 try
                 {
                     file = GetFirstFile(dnyConfig);
                     if (file == null) continue;
 
-                    Logger.Log($"DnyUploader:UploadOne:file:{file}");
+                    logger.LogInformation($"DnyUploader:UploadOne:file:{file}");
 
                     DateTime timestamp = ParseTimestamp(file);
                     string json = File.ReadAllText(file);
-                    Dny dny = JsonConvert.DeserializeObject<Dny>(json);
+                    Dny? dny = JsonConvert.DeserializeObject<Dny>(json);
 
-                    if (await api.PostDny(dny, timestamp)) MoveFileToArchive(dnyConfig, file);
+                    if (dny != null && await api.PostDny(dny, timestamp)) MoveFileToArchive(dnyConfig, file);
                     else MoveFileToError(dnyConfig, file);
                     break;
                 }
                 catch (Exception exc)
                 {
-                    Logger.Log(exc.ToString());
+                    logger.LogInformation(exc.ToString());
                     if (file != null)
                     {
                         MoveFileToError(dnyConfig, file);
@@ -120,16 +102,9 @@ namespace TrainScraping
             }
         }
 
-        private async void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        public override void Dispose()
         {
-            await UploadOne();
-        }
-
-        public void Dispose()
-        {
-            timer.Stop();
-            timer.Dispose();
-
+            base.Dispose();
             api.Dispose();
         }
     }

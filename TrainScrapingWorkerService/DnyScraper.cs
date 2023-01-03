@@ -1,35 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
+﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
-using System.Timers;
-using TrainScraping.Configuration;
+using TrainScrapingWorkerService.Configuration;
 
-namespace TrainScraping
+namespace TrainScrapingWorkerService
 {
-    class DnyScraper : IDisposable
+    class DnyScraper : RegularTask
     {
         private readonly static Random rnd = new Random();
 
-        private readonly Timer timer;
         private readonly HttpClient client;
         private readonly DnyScrapingConfig config;
+        private readonly ILogger logger;
 
-        public DnyScraper(DnyScrapingConfig config)
+        public DnyScraper(DnyScrapingConfig config, ILogger logger) : base(TimeSpan.FromSeconds(config.IntervalSeconds))
         {
-            timer = new Timer();
-            timer.Elapsed += Timer_Elapsed;
-            if (config.IntervalSeconds > 0)
-            {
-                timer.Interval = config.IntervalSeconds * 1000;
-            }
-
             this.config = config;
+            this.logger = logger;
+
             client = CreateHttpClient(config);
         }
 
@@ -63,19 +51,6 @@ namespace TrainScraping
             return client;
         }
 
-        private async void Timer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            await Scrape();
-        }
-
-        public void StartTimer()
-        {
-            if (config.IntervalSeconds > 0)
-            {
-                timer.Start();
-            }
-        }
-
         private static string CreateSearchParam(DnySearchParamConfig param)
         {
             string value;
@@ -102,48 +77,42 @@ namespace TrainScraping
             Directory.CreateDirectory(config.DownloadFolder);
         }
 
-        public async Task Scrape()
+        public override async Task Execute()
         {
             try
             {
-                Logger.Log("SnyScraper:Scrape:start");
+                logger.LogInformation("SnyScraper:Scrape:start");
 
                 string searchParams = CreateSearchParams();
-                Logger.Log($"SnyScraper:Scrape:searchParams:{searchParams}");
+                logger.LogInformation($"SnyScraper:Scrape:searchParams:{searchParams}");
 
-                using (HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(config.HttpMethod), searchParams))
+                using HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(config.HttpMethod), searchParams);
+                using HttpResponseMessage result = await client.SendAsync(request).ConfigureAwait(false);
+                if (!result.IsSuccessStatusCode)
                 {
-
-                    using (HttpResponseMessage result = await client.SendAsync(request).ConfigureAwait(false))
-                    {
-                        if (!result.IsSuccessStatusCode)
-                        {
-                            Logger.Log($"SnyScraper:Scrape:request_error:StatusCode={result.StatusCode}");
-                            return;
-                        }
-
-                        string path = Path.Combine(config.DownloadFolder, $"{DateTime.UtcNow:yyyy-MM-ddTHH-mm-ss}.json");
-                        string content = await result.Content.ReadAsStringAsync();
-
-                        CreateDirectory();
-                        File.WriteAllText(path, content, Encoding.UTF8);
-                    }
+                    logger.LogInformation($"SnyScraper:Scrape:request_error:StatusCode={result.StatusCode}");
+                    return;
                 }
+
+                string path = Path.Combine(config.DownloadFolder, $"{DateTime.UtcNow:yyyy-MM-ddTHH-mm-ss}.json");
+                string content = await result.Content.ReadAsStringAsync();
+
+                CreateDirectory();
+                File.WriteAllText(path, content, Encoding.UTF8);
             }
             catch (Exception e)
             {
-                Logger.Log(e.ToString());
+                logger.LogInformation(e.ToString());
             }
             finally
             {
-                Logger.Log("SnyScraper:Scrape:end");
+                logger.LogInformation("SnyScraper:Scrape:end");
             }
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
-            timer.Stop();
-            timer.Dispose();
+            base.Dispose();
             client.Dispose();
         }
     }

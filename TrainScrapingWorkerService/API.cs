@@ -1,13 +1,10 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 using TrainScrapingCommon.Models;
 using TrainScrapingCommon.Models.RequestBody;
 
-namespace TrainScraping
+namespace TrainScrapingWorkerService
 {
     class API : IDisposable
     {
@@ -34,7 +31,7 @@ namespace TrainScraping
             }
             catch (Exception e)
             {
-                Logger.Log(e.ToString());
+                Console.WriteLine(e.ToString());
                 return false;
             }
         }

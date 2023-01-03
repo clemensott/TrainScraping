@@ -1,20 +1,18 @@
-﻿using System;
-using System.IO;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
-namespace TrainScraping.Configuration
+namespace TrainScrapingWorkerService.Configuration
 {
     public class Config
     {
         private static XmlSerializer serializer = new XmlSerializer(typeof(Config));
 
-        public string ApiBaseUrl { get; set; }
+        public string ApiBaseUrl { get; set; } = string.Empty;
 
-        public string ApiToken { get; set; }
-        
+        public string ApiToken { get; set; } = string.Empty;
+
         public int DnyUploadIntervalSeconds { get; set; }
 
-        public DnyScrapingConfig[] DNYs { get; set; }
+        public DnyScrapingConfig[] DNYs { get; set; } = new DnyScrapingConfig[0];
 
         public static Config Load()
         {
@@ -23,9 +21,9 @@ namespace TrainScraping.Configuration
 
         public static Config Load(string path)
         {
-                string xmlText = File.ReadAllText(path);
+            string xmlText = File.ReadAllText(path);
 
-                return (Config)serializer.Deserialize(new StringReader(xmlText));
+            return (Config)serializer.Deserialize(new StringReader(xmlText));
         }
 
         public void Serialize()
