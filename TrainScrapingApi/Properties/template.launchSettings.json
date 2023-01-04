@@ -14,7 +14,8 @@
       "launchBrowser": true,
       "launchUrl": "ping",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "YT_SUB_API_CONNECTION_STRING": "Host=;Port=5432;Database=TrainScraping;Username=;Password="
       }
     },
     "TrainScrapingApi": {
@@ -23,7 +24,8 @@
       "launchUrl": "ping",
       "applicationUrl": "https://localhost:5001;http://localhost:5000",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "YT_SUB_API_CONNECTION_STRING": "Host=;Port=5432;Database=TrainScraping;Username=;Password="
       }
     }
   }

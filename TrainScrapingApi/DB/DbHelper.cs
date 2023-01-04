@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +11,8 @@ namespace TrainScrapingApi.DB
 {
     static class DbHelper
     {
-        private static readonly string connectionString = File.ReadAllText("connectionString.txt");
+        private static readonly string connectionString = Environment
+            .GetEnvironmentVariable("YT_SUB_API_CONNECTION_STRING") ?? throw new Exception("No connectionString");
         private static NpgsqlConnection defaultConnection;
 
         private static readonly SemaphoreSlim lockHandlerSem = new SemaphoreSlim(1);

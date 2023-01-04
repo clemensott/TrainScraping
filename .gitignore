@@ -260,6 +260,6 @@ paket-files/
 __pycache__/
 *.pyc
 
-.env
+
 config.xml
-connectionString.txt
+launchSettings.json
