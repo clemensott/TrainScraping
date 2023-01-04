@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System.Timers;
 using TrainScrapingWorkerService.Configuration;
 using TrainScrapingCommon.Models;
 
