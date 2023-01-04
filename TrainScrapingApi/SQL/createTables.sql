@@ -47,6 +47,7 @@ CREATE TABLE train_days
 );
 ALTER TABLE train_days
     ALTER COLUMN created SET DEFAULT NOW();
+CREATE INDEX train_days_train_id_date_idx ON train_days (train_id, "date");
 
 
 CREATE TABLE dny_train_infos
@@ -60,10 +61,12 @@ CREATE TABLE dny_train_infos
 );
 ALTER TABLE dny_train_infos
     ALTER COLUMN created SET DEFAULT NOW();
+CREATE INDEX dny_train_infos_search_idx ON dny_train_infos (name, destination, product_class);
+
 
 CREATE TABLE dny_train_days
 (
-    id                SERIAL        NOT NULL PRIMARY KEY,
+    id                BIGSERIAL     NOT NULL PRIMARY KEY,
     dny_id            INTEGER       NOT NULL REFERENCES dnys (id),
     train_day_id      INTEGER       NOT NULL REFERENCES train_days (id),
     dny_train_info_id INTEGER       NOT NULL REFERENCES dny_train_infos (id),
@@ -76,4 +79,5 @@ CREATE TABLE dny_train_days
 );
 ALTER TABLE dny_train_days
     ALTER COLUMN created SET DEFAULT NOW();
+CREATE INDEX dny_train_days_dny_id_idx ON dny_train_days (dny_id);
 
