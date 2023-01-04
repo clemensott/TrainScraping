@@ -1,9 +1,12 @@
-﻿using System;
+﻿using Npgsql;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using TrainScrapingApi.DB;
 using TrainScrapingApi.Models;
 using TrainScrapingCommon.Models;
 
@@ -11,7 +14,9 @@ namespace TrainScrapingApi.Helpers
 {
     static class DnyHelper
     {
-        private static Task<int> InsertDnyEntry(Dny dny, DateTime timestamp)
+        private static readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
+
+        private static Task<int> InsertDnyEntry(NpgsqlConnection connection, Dny dny, DateTime timestamp)
         {
             TimeSpan time = TimeSpan.Parse(dny.Ts);
             decimal minLat = ParseHelper.ParseCoordinate(dny.Y1);
@@ -34,10 +39,10 @@ namespace TrainScrapingApi.Helpers
                 .Add("trainsCount", trainsCount)
                 .Add("timestamp", timestamp);
 
-            return DbHelper.ExecuteScalarAsync<int>(sql, parameters);
+            return connection.ExecuteScalarAsync<int>(sql, parameters);
         }
 
-        private static async Task InsertTrains(IList<DnyTrainContainer> containers)
+        private static async Task InsertTrains(NpgsqlConnection connection, IList<DnyTrainContainer> containers)
         {
             const string dataColumns = "hash_id";
             ILookup<string, DnyTrainContainer> lookup = containers.ToLookup(c => c.Train.I);
@@ -47,7 +52,7 @@ namespace TrainScrapingApi.Helpers
             KeyValueSet getParameters = new KeyValueSet()
                 .Add(DbHelper.GetParameters("hashId", lookup.Select(p => p.Key)));
 
-            IDataRecord[] getResult = await DbHelper.ExecuteSelectAllAsync(getSql, getParameters);
+            IDataRecord[] getResult = await connection.ExecuteSelectAllAsync(getSql, getParameters);
             SetTrainIds(getResult);
 
             string[] missingHashIds = containers.Where(c => c.TrainId == 0).Select(c => c.Train.I).Distinct().ToArray();
@@ -58,7 +63,7 @@ namespace TrainScrapingApi.Helpers
             KeyValueSet insertParameters = new KeyValueSet()
                 .Add(DbHelper.GetParameters("hashId", missingHashIds));
 
-            IDataRecord[] insertResult = await DbHelper.ExecuteSelectAllAsync(insertSql, insertParameters);
+            IDataRecord[] insertResult = await connection.ExecuteSelectAllAsync(insertSql, insertParameters);
             SetTrainIds(insertResult);
 
             if (containers.Any(c => c.TrainId == 0)) throw new Exception("Missing train id");
@@ -78,9 +83,9 @@ namespace TrainScrapingApi.Helpers
             }
         }
 
-        private static async Task InsertTrainDays(IList<DnyTrainContainer> containers)
+        private static async Task InsertTrainDays(NpgsqlConnection connection, IList<DnyTrainContainer> containers)
         {
-            await InsertTrains(containers);
+            await InsertTrains(connection, containers);
 
             const string dataColumns = "train_id, date";
             ILookup<int, DnyTrainContainer> lookup = containers.ToLookup(c => c.TrainId);
@@ -91,7 +96,7 @@ namespace TrainScrapingApi.Helpers
                 .Add(DbHelper.GetParameters("trainId", containers.Select(c => c.TrainId)))
                 .Add(DbHelper.GetParameters("date", containers.Select(c => c.Date)));
 
-            IDataRecord[] getResult = await DbHelper.ExecuteSelectAllAsync(getSql, getParameters);
+            IDataRecord[] getResult = await connection.ExecuteSelectAllAsync(getSql, getParameters);
             SetTrainDayIds(getResult);
 
             DnyTrainContainer[] missingContainers = containers
@@ -106,7 +111,7 @@ namespace TrainScrapingApi.Helpers
                 .Add(DbHelper.GetParameters("trainId", missingContainers.Select(c => c.TrainId)))
                 .Add(DbHelper.GetParameters("date", missingContainers.Select(c => c.Date)));
 
-            IDataRecord[] insertResult = await DbHelper.ExecuteSelectAllAsync(insertSql, insertParameters);
+            IDataRecord[] insertResult = await connection.ExecuteSelectAllAsync(insertSql, insertParameters);
             SetTrainDayIds(insertResult);
 
             if (containers.Any(c => c.TrainDayId == 0)) throw new Exception("Missing train_day id");
@@ -127,7 +132,7 @@ namespace TrainScrapingApi.Helpers
             }
         }
 
-        private static async Task InsertTrainInfo(DnyTrainContainer[] containers)
+        private static async Task InsertTrainInfo(NpgsqlConnection connection, DnyTrainContainer[] containers)
         {
             const string dataColumns = "name, destination, product_class";
             ILookup<string, DnyTrainContainer> lookup = containers.ToLookup(c => c.Train.N);
@@ -139,7 +144,7 @@ namespace TrainScrapingApi.Helpers
                 .Add(DbHelper.GetParameters("destination", containers.Select(c => c.Train.L)))
                 .Add(DbHelper.GetParameters("productClass", containers.Select(c => c.ProductClass)));
 
-            IDataRecord[] getResult = await DbHelper.ExecuteSelectAllAsync(getSql, getParameters);
+            IDataRecord[] getResult = await connection.ExecuteSelectAllAsync(getSql, getParameters);
             SetDnyTrainInfoIds(getResult);
 
             DnyTrainContainer[] missingContainers = containers
@@ -155,7 +160,7 @@ namespace TrainScrapingApi.Helpers
                 .Add(DbHelper.GetParameters("destination", missingContainers.Select(c => c.Train.L)))
                 .Add(DbHelper.GetParameters("productClass", missingContainers.Select(c => c.ProductClass)));
 
-            IDataRecord[] insertResult = await DbHelper.ExecuteSelectAllAsync(insertSql, insertParameters);
+            IDataRecord[] insertResult = await connection.ExecuteSelectAllAsync(insertSql, insertParameters);
             SetDnyTrainInfoIds(insertResult);
 
             if (containers.Any(c => c.DnyTrainInfoId == 0)) throw new Exception("Missing dny_train_info id");
@@ -177,13 +182,13 @@ namespace TrainScrapingApi.Helpers
             }
         }
 
-        private static Task InsertDnyTrains(int dnyId, DnyTrain[] allTrains)
+        private static Task InsertDnyTrains(NpgsqlConnection connection, int dnyId, DnyTrain[] allTrains)
         {
             return DbHelper.DoInGroups(allTrains, 1000, async group =>
             {
                 DnyTrainContainer[] containers = group.Select(t => new DnyTrainContainer(t)).ToArray();
-                await InsertTrainDays(containers);
-                await InsertTrainInfo(containers);
+                await InsertTrainDays(connection, containers);
+                await InsertTrainInfo(connection, containers);
 
                 string insertValues = DbHelper.Format(containers,
                     "(@dnyId, @trainDayId{0}, @dnyTrainInfoId{0}, @latitude{0}, @longitude{0}, @direction{0}, @delay{0})", ",");
@@ -198,22 +203,33 @@ namespace TrainScrapingApi.Helpers
                     .Add(DbHelper.GetParameters("longitude", containers.Select(c => c.Longitude)))
                     .Add(DbHelper.GetParameters("direction", containers.Select(c => c.Direction)))
                     .Add(DbHelper.GetParameters("delay", containers.Select(c => c.Delay)));
-                await DbHelper.ExecuteNonQueryAsync(insertSql, parameters);
+                await connection.ExecuteNonQueryAsync(insertSql, parameters);
             });
         }
 
-        private static Task SetDnySuccessfull(int dnyId)
+        private static Task SetDnySuccessfull(NpgsqlConnection connection, int dnyId)
         {
             const string sql = "UPDATE dnys SET success = TRUE WHERE id = @id;";
             KeyValueSet parameters = new KeyValueSet("id", dnyId);
-            return DbHelper.ExecuteNonQueryAsync(sql, parameters);
+            return connection.ExecuteNonQueryAsync(sql, parameters);
         }
 
         public static async Task Insert(Dny dny, DateTime timestamp)
         {
-            int dnyId = await InsertDnyEntry(dny, timestamp);
-            await InsertDnyTrains(dnyId, dny.T);
-            await SetDnySuccessfull(dnyId);
+            try
+            {
+                await semaphore.WaitAsync();
+                await DbHelper.RunTransaction(async connection =>
+                {
+                    int dnyId = await InsertDnyEntry(connection, dny, timestamp);
+                    await InsertDnyTrains(connection, dnyId, dny.T);
+                    await SetDnySuccessfull(connection, dnyId);
+                });
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
 
         class TrainDayEqualityComparer : IEqualityComparer<DnyTrainContainer>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using TrainScrapingApi.DB;
 
 namespace TrainScrapingApi.Helpers
 {
@@ -10,7 +11,7 @@ namespace TrainScrapingApi.Helpers
             const string sql = "SELECT count(id) FROM users WHERE token = @token AND disabled = FALSE;";
             KeyValueSet parameters = new KeyValueSet("token", token);
 
-            object scalar = await DbHelper.ExecuteScalarAsync(sql, parameters);
+            object scalar = await DbHelper.DefaultConnection.ExecuteScalarAsync(sql, parameters);
 
             return scalar is long id ? id > 0 : false;
         }
