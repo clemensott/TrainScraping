@@ -54,7 +54,7 @@ namespace TrainScrapingApi.Helpers
                 }
             }
 
-            UpdateDebug(sql);
+            UpdateDebug(sql, parameters);
 
             return command;
         }
@@ -167,11 +167,27 @@ namespace TrainScrapingApi.Helpers
             }
         }
 
-        private static void UpdateDebug(string sql)
+        private static string GetEscapedValue(object value)
         {
+            if (value is null) return "null";
+            if (value is bool || value is byte || value is short || value is int || value is long) return value.ToString();
+            return $"'{value.ToString().Replace("'", "''")}'";
+        }
+
+        private static void UpdateDebug(string sql, IEnumerable<KeyValuePair<string, object>> parameters)
+        {
+            if (parameters != null)
+            {
+                foreach (var pair in parameters.OrderByDescending(p => p.Key.Length))
+                {
+                    sql = sql.Replace($"@{pair.Key}", GetEscapedValue(pair.Value));
+                }
+            }
             LastSql = sql;
             LastTimestamp = DateTime.Now;
             StatementCount++;
+
+            System.Diagnostics.Debug.WriteLine(sql);
         }
 
         public static string Format(int count, string format, string seperator)
@@ -188,6 +204,13 @@ namespace TrainScrapingApi.Helpers
         {
             int i = 0;
             return values.Select(v => new KeyValuePair<string, object>(keyPrefix + i++, v));
+        }
+
+        public static T GetValue<T>(this IDataRecord record, string name, T defaultValue = default(T))
+        {
+            object value = record[name];
+
+            return value is DBNull ? defaultValue : (T)value;
         }
 
         public static async Task DoInGroups<T>(IEnumerable<T> src, int maxCount, Func<IList<T>, Task> func)
