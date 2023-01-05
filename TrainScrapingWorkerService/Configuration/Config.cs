@@ -1,4 +1,5 @@
-﻿using System.Xml.Serialization;
+﻿using System.Security.Cryptography;
+using System.Xml.Serialization;
 
 namespace TrainScrapingWorkerService.Configuration
 {
@@ -23,7 +24,7 @@ namespace TrainScrapingWorkerService.Configuration
         {
             string xmlText = File.ReadAllText(path);
 
-            return (Config)serializer.Deserialize(new StringReader(xmlText));
+            return (serializer.Deserialize(new StringReader(xmlText)) as Config) ?? throw new Exception("Config is null");
         }
 
         public void Serialize()

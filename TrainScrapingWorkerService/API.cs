@@ -45,21 +45,17 @@ namespace TrainScrapingWorkerService
             });
         }
 
-        public async Task<bool> Request(string requestUrl, HttpMethod method, RequestBodyBase body = null)
+        public async Task<bool> Request(string requestUrl, HttpMethod method, RequestBodyBase? body = null)
         {
-            using (HttpRequestMessage request = new HttpRequestMessage(method, requestUrl))
+            using HttpRequestMessage request = new HttpRequestMessage(method, requestUrl);
+            if (body != null)
             {
-                if (body != null)
-                {
-                    string json = JsonConvert.SerializeObject(body);
-                    request.Content = new StringContent(json, Encoding.UTF8, "application/json");
-                }
-
-                using (HttpResponseMessage response = await client.SendAsync(request))
-                {
-                    return response.IsSuccessStatusCode;
-                }
+                string json = JsonConvert.SerializeObject(body);
+                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
             }
+
+            using HttpResponseMessage response = await client.SendAsync(request);
+            return response.IsSuccessStatusCode;
         }
 
         public void Dispose()
