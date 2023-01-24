@@ -1,4 +1,5 @@
 ﻿using System;
+using TrainScrapingCommon.Models.Dnys;
 
 namespace TrainScrapingCommon.Models.RequestBody
 {
@@ -6,6 +7,6 @@ namespace TrainScrapingCommon.Models.RequestBody
     {
         public DateTime Timestamp { get; set; }
 
-        public Dny Dny { get; set; }
+        public DnyPost Dny { get; set; }
     }
 }

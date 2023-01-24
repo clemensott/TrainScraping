@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using TrainScrapingApi.Helpers;
-using TrainScrapingCommon.Models;
+using TrainScrapingCommon.Models.Dnys;
 
 namespace TrainScrapingApi.Models
 {

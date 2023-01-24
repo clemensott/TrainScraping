@@ -1,12 +1,11 @@
-﻿namespace TrainScrapingCommon.Models
-{
-    public class Dny
-    {
-        /// <summary>
-        /// Trains
-        /// </summary>
-        public DnyTrain[] T { get; set; }
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
+namespace TrainScrapingCommon.Models.Dnys
+{
+    public class DnyBase
+    {
         /// <summary>
         /// Time (e.g.: 19:48:12)
         /// </summary>

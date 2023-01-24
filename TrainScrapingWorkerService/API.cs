@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;
-using TrainScrapingCommon.Models;
+using TrainScrapingCommon.Models.Dnys;
 using TrainScrapingCommon.Models.RequestBody;
 
 namespace TrainScrapingWorkerService

@@ -12,7 +12,7 @@ namespace TrainScrapingApi.DB
     static class DbHelper
     {
         private static readonly string connectionString = Environment
-            .GetEnvironmentVariable("YT_SUB_API_CONNECTION_STRING") ?? throw new Exception("No connectionString");
+            .GetEnvironmentVariable("TRAIN_SCRAPING_API_CONNECTION_STRING") ?? throw new Exception("No connectionString");
         private static NpgsqlConnection defaultConnection;
 
         private static readonly SemaphoreSlim lockHandlerSem = new SemaphoreSlim(1);
@@ -218,6 +218,7 @@ namespace TrainScrapingApi.DB
         private static string GetEscapedValue(object value)
         {
             if (value is null) return "null";
+            if (value is DateTime dateTime) return dateTime.ToString("u");
             if (value is bool || value is byte || value is short || value is int || value is long) return value.ToString();
             return $"'{value.ToString().Replace("'", "''")}'";
         }

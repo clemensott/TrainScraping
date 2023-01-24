@@ -1,22 +1,18 @@
 ﻿using Npgsql;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using TrainScrapingApi.DB;
+using TrainScrapingApi.Helpers;
 using TrainScrapingApi.Models;
-using TrainScrapingCommon.Models;
+using TrainScrapingCommon.Models.Dnys;
 
-namespace TrainScrapingApi.Helpers
+namespace TrainScrapingApi.Dnys
 {
-    static class DnyHelper
+    static class DnyImportHelper
     {
         private static readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
 
-        private static Task<int> InsertDnyEntry(NpgsqlConnection connection, Dny dny, DateTime timestamp)
+        private static Task<int> InsertDnyEntry(NpgsqlConnection connection, DnyPost dny, DateTime timestamp)
         {
             TimeSpan time = TimeSpan.Parse(dny.Ts);
             decimal minLat = ParseHelper.ParseCoordinate(dny.Y1);
@@ -214,7 +210,7 @@ namespace TrainScrapingApi.Helpers
             return connection.ExecuteNonQueryAsync(sql, parameters);
         }
 
-        public static async Task Insert(Dny dny, DateTime timestamp)
+        public static async Task Insert(DnyPost dny, DateTime timestamp)
         {
             try
             {
@@ -256,9 +252,7 @@ namespace TrainScrapingApi.Helpers
 
         class DnyTrainInfoEqualityComparer : IEqualityComparer<DnyTrainContainer>
         {
-            private static DnyTrainInfoEqualityComparer instance;
-
-            public static DnyTrainInfoEqualityComparer Instance => instance ??= new DnyTrainInfoEqualityComparer();
+            public static DnyTrainInfoEqualityComparer Instance { get; } = new DnyTrainInfoEqualityComparer();
 
 
             public bool Equals([AllowNull] DnyTrainContainer x, [AllowNull] DnyTrainContainer y)

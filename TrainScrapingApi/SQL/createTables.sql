@@ -1,8 +1,8 @@
 ﻿CREATE TABLE users
 (
-    id       SERIAL        NOT NULL PRIMARY KEY,
-    token    VARCHAR(1024) NOT NULL,
-    disabled BOOLEAN       NOT NULL,
+    id       SERIAL                  NOT NULL PRIMARY KEY,
+    token    VARCHAR(1024)           NOT NULL,
+    disabled BOOLEAN   DEFAULT FALSE NOT NULL,
     created  TIMESTAMP DEFAULT NULL
 );
 ALTER TABLE users

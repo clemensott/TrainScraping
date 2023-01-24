@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using TrainScrapingWorkerService.Configuration;
-using TrainScrapingCommon.Models;
+using TrainScrapingCommon.Models.Dnys;
 
 namespace TrainScrapingWorkerService
 {

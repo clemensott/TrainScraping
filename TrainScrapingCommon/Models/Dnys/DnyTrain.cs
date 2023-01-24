@@ -1,4 +1,4 @@
-﻿namespace TrainScrapingCommon.Models
+﻿namespace TrainScrapingCommon.Models.Dnys
 {
     public class DnyTrain
     {
