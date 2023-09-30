@@ -8,7 +8,7 @@ namespace TrainScrapingApi.Controllers
         [HttpGet]
         public ActionResult<string> Get()
         {
-            return "Success";
+            return "TrainScraping";
         }
     }
 }

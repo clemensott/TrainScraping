@@ -1,7 +1,14 @@
+using TrainScrapingApi.Extensions.DependencyInjection;
+using TrainScrapingApi.Extensions.Middlewares;
+using TrainScrapingApi.Middlewares;
+using TrainScrapingApi.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddSingleton<IAppConfigService, AppEnvConfigService>();
+builder.Services.AddSqlServices();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -26,12 +33,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseGlobalErrorHandler();
 app.UseHttpsRedirection();
-
 app.UseCors("openrailwaymap");
-
-app.UseAuthorization();
-
+app.UseMiddleware<BasicAuthorizationMiddleware>();
 app.MapControllers();
 
 app.Run();

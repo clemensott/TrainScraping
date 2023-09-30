@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace TrainScrapingApi.DB
+namespace TrainScrapingApi.Helpers.DB
 {
     public class KeyValueSet : IEnumerable<KeyValuePair<string, object>>
     {

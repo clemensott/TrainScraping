@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TrainScrapingApi.Helpers
+﻿namespace TrainScrapingApi.Helpers
 {
     static class ParseHelper
     {
