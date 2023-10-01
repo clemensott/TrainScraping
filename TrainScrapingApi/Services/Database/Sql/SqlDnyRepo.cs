@@ -1,10 +1,10 @@
 ﻿using Npgsql;
 using System.Data;
 using TrainScrapingApi.Extensions.ModelConverting;
-using TrainScrapingApi.Helpers;
 using TrainScrapingApi.Helpers.Comparers;
 using TrainScrapingApi.Helpers.DB;
 using TrainScrapingApi.Models;
+using TrainScrapingCommon.Helpers;
 using TrainScrapingCommon.Models.Dnys;
 
 namespace TrainScrapingApi.Services.Database.Sql

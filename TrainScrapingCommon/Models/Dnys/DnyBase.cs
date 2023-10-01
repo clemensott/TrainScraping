@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TrainScrapingCommon.Models.Dnys
+﻿namespace TrainScrapingCommon.Models.Dnys
 {
     public class DnyBase
     {
@@ -27,7 +23,7 @@ namespace TrainScrapingCommon.Models.Dnys
         public string Y1 { get; set; }
 
         /// <summary>
-        /// Min Latitude (e.g.: 34251118 => 34.251118)
+        /// Max Latitude (e.g.: 34251118 => 34.251118)
         /// </summary>
         public string Y2 { get; set; }
 

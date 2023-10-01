@@ -1,5 +1,4 @@
-﻿using System.Security.Cryptography;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
 namespace TrainScrapingWorkerService.Configuration
 {
@@ -10,6 +9,12 @@ namespace TrainScrapingWorkerService.Configuration
         public string ApiBaseUrl { get; set; } = string.Empty;
 
         public string ApiToken { get; set; } = string.Empty;
+
+        public string ApiBucket { get; set; } = string.Empty;
+
+        public string ApiOrg { get; set; } = string.Empty;
+
+        public string ScraperId { get; set; } = string.Empty;
 
         public int DnyUploadIntervalSeconds { get; set; }
 

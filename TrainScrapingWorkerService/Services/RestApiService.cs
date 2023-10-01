@@ -4,9 +4,9 @@ using System.Text;
 using TrainScrapingCommon.Models.Dnys;
 using TrainScrapingCommon.Models.RequestBody;
 
-namespace TrainScrapingWorkerService
+namespace TrainScrapingWorkerService.Services
 {
-    class API : IDisposable
+    class RestApiService : IApiService
     {
         private readonly HttpClient client;
 
@@ -14,7 +14,7 @@ namespace TrainScrapingWorkerService
 
         public string Token { get; }
 
-        public API(string baseUrl, string token)
+        public RestApiService(string baseUrl, string token)
         {
             BaseUrl = baseUrl;
             Token = token;
@@ -36,7 +36,7 @@ namespace TrainScrapingWorkerService
             }
         }
 
-        public Task<bool> PostDny(Dny dny, DateTime timestamp)
+        public Task<bool> PostDny(DnyPost dny, DateTime timestamp)
         {
             return Request("/trains/dny", HttpMethod.Post, new PostDnyBody()
             {

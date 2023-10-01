@@ -1,6 +1,8 @@
-﻿namespace TrainScrapingApi.Helpers
+﻿using System;
+
+namespace TrainScrapingCommon.Helpers
 {
-    static class ParseHelper
+    public static class ParseHelper
     {
         /// <summary>
         /// Parses Date with Format: DD.MM.YY

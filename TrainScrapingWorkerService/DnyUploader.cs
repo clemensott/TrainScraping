@@ -1,13 +1,14 @@
 ﻿using Newtonsoft.Json;
 using TrainScrapingWorkerService.Configuration;
 using TrainScrapingCommon.Models.Dnys;
+using TrainScrapingWorkerService.Services;
 
 namespace TrainScrapingWorkerService
 {
     class DnyUploader : RegularTask
     {
         private readonly Config config;
-        private readonly API api;
+        private readonly IApiService api;
         private readonly ILogger logger;
 
         public DnyUploader(Config config, ILogger logger) : base(TimeSpan.FromSeconds(config.DnyUploadIntervalSeconds))
@@ -15,7 +16,8 @@ namespace TrainScrapingWorkerService
             this.config = config;
             this.logger = logger;
 
-            api = new API(config.ApiBaseUrl, config.ApiToken);
+            //api = new RestApiService(config.ApiBaseUrl, config.ApiToken);
+            api = new InfluxApiService(config.ApiBaseUrl, config.ApiToken, config.ApiBucket, config.ApiOrg, config.ScraperId);
         }
 
         private static string? GetFirstFile(DnyScrapingConfig config)
