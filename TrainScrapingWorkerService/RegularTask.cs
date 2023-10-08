@@ -15,7 +15,7 @@ namespace TrainScrapingWorkerService
         public RegularTask(TimeSpan interval)
         {
             this.interval = interval;
-            lastRun = interval > TimeSpan.Zero ? DateTime.MinValue : DateTime.MaxValue;
+            lastRun = interval >= TimeSpan.Zero ? DateTime.MinValue : DateTime.MaxValue;
         }
 
         public abstract Task Execute();
