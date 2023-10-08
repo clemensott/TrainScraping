@@ -10,17 +10,11 @@ namespace TrainScrapingWorkerService.Services
     {
         private readonly HttpClient client;
 
-        public string BaseUrl { get; }
-
-        public string Token { get; }
-
         public RestApiService(string baseUrl, string token)
         {
-            BaseUrl = baseUrl;
-            Token = token;
             client = new HttpClient();
             client.BaseAddress = new Uri(baseUrl);
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Token);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
         }
 
         public async Task<bool> Ping()

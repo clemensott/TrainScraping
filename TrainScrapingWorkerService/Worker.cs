@@ -26,7 +26,7 @@ namespace TrainScrapingWorkerService
                     await regularTask.Tick();
                 }
 
-                await Task.Delay(1000, stoppingToken);
+                await Task.Delay(300, stoppingToken);
             }
 
             foreach (RegularTask regularTask in tasks)

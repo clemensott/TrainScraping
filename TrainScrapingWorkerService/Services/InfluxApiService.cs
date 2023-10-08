@@ -10,10 +10,6 @@ namespace TrainScrapingWorkerService.Services
     {
         private readonly InfluxDBClient client;
 
-        public string BaseUrl { get; }
-
-        public string Token { get; }
-
         public string Bucket { get; }
 
         public string Org { get; }
@@ -22,13 +18,11 @@ namespace TrainScrapingWorkerService.Services
 
         public InfluxApiService(string baseUrl, string token, string bucket, string org, string scraperId)
         {
-            BaseUrl = baseUrl;
-            Token = token;
             Bucket = bucket;
             Org = org;
             ScraperId = scraperId;
 
-            client = new InfluxDBClient(BaseUrl, token);
+            client = new InfluxDBClient(baseUrl, token);
         }
 
         public Task<bool> Ping()
@@ -59,16 +53,16 @@ namespace TrainScrapingWorkerService.Services
                 foreach (DnyTrain train in dny.T)
                 {
                     PointData trainMeasurement = PointData.Measurement("dny_train")
-                        .Tag("train_id", train.I)
+                        .Tag("name", train.N)
+                        .Tag("destination", train.L)
+                        .Field("train_id", train.I)
                         .Field("dny_id", dnyId)
                         .Field("lat", int.Parse(train.X))
                         .Field("long", int.Parse(train.Y))
-                        .Field("name", train.N)
                         .Field("direction", int.Parse(train.D))
                         .Field("product_class", int.Parse(train.C))
                         .Field("date", ParseHelper.ParseDate(train.R).ToString("yyyy-MM-dd"))
                         .Field("delay", string.IsNullOrEmpty(train.Rt) ? null : int.Parse(train.Rt))
-                        .Field("destination", train.L)
                         .Timestamp(timestamp, WritePrecision.S);
 
                     points.Add(trainMeasurement);

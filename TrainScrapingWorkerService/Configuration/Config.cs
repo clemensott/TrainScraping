@@ -6,15 +6,32 @@ namespace TrainScrapingWorkerService.Configuration
     {
         private static XmlSerializer serializer = new XmlSerializer(typeof(Config));
 
+        /// <summary>
+        /// In what type of API should the data be uploaded
+        /// </summary>
+        public ApiTypeConfig ApiType { get; set; } = ApiTypeConfig.Rest;
+
         public string ApiBaseUrl { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Part of the credentials for Rest, IndluxDB and QuestDB
+        /// </summary>
         public string ApiToken { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Bucket name for InfluxDB
+        /// </summary>
         public string ApiBucket { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Org for InfluxDB
+        /// </summary>
         public string ApiOrg { get; set; } = string.Empty;
 
-        public string ScraperId { get; set; } = string.Empty;
+        /// <summary>
+        /// Name of Scraper for InfluxDB and QuestDB
+        /// </summary>
+        public string ScraperName { get; set; } = string.Empty;
 
         public int DnyUploadIntervalSeconds { get; set; }
 

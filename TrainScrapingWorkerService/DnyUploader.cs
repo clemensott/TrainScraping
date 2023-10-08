@@ -2,6 +2,7 @@
 using TrainScrapingWorkerService.Configuration;
 using TrainScrapingCommon.Models.Dnys;
 using TrainScrapingWorkerService.Services;
+using TrainScrapingWorkerService.Extensions;
 
 namespace TrainScrapingWorkerService
 {
@@ -16,13 +17,15 @@ namespace TrainScrapingWorkerService
             this.config = config;
             this.logger = logger;
 
-            //api = new RestApiService(config.ApiBaseUrl, config.ApiToken);
-            api = new InfluxApiService(config.ApiBaseUrl, config.ApiToken, config.ApiBucket, config.ApiOrg, config.ScraperId);
+            api = config.CreateApi();
         }
 
         private static string? GetFirstFile(DnyScrapingConfig config)
         {
-            return Directory.EnumerateFiles(config.DownloadFolder).Where(path => path.EndsWith(".json")).FirstOrDefault();
+            return Directory.EnumerateFiles(config.DownloadFolder)
+                .Where(path => path.EndsWith(".json"))
+                .OrderBy(path => path)
+                .FirstOrDefault();
         }
 
         private static DateTime ParseTimestamp(string path)
