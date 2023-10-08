@@ -24,8 +24,7 @@ namespace TrainScrapingWorkerService
         {
             return Directory.EnumerateFiles(config.DownloadFolder)
                 .Where(path => path.EndsWith(".json"))
-                .OrderBy(path => path)
-                .FirstOrDefault();
+                .Min();
         }
 
         private static DateTime ParseTimestamp(string path)
