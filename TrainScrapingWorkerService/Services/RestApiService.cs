@@ -30,13 +30,16 @@ namespace TrainScrapingWorkerService.Services
             }
         }
 
-        public Task<bool> PostDny(DnyPost dny, DateTime timestamp)
+        public async Task PostDny(DnyPost dny, DateTime timestamp)
         {
-            return Request("/trains/dny", HttpMethod.Post, new PostDnyBody()
+            if(!await Request("/trains/dny", HttpMethod.Post, new PostDnyBody()
             {
                 Dny = dny,
                 Timestamp = timestamp,
-            });
+            }))
+            {
+                throw new Exception("Request was not successful");
+            }
         }
 
         public async Task<bool> Request(string requestUrl, HttpMethod method, RequestBodyBase? body = null)

@@ -36,55 +36,45 @@ namespace TrainScrapingWorkerService.Services
             }
         }
 
-        public async Task<bool> PostDny(DnyPost dny, DateTime timestamp)
+        public async Task PostDny(DnyPost dny, DateTime timestamp)
         {
-            try
+            TlsMode mode = BaseAddress.Scheme == "https" ? TlsMode.Enable : TlsMode.Disable;
+            using LineTcpSender ls = await LineTcpSender.ConnectAsync(BaseAddress.Host, BaseAddress.Port, tlsMode: mode);
+
+            string dnyId = Guid.NewGuid().ToString();
+            ls.Table("dnys")
+                .Symbol("scraper_id", ScraperId)
+                .Column("id", dnyId)
+                .Column("local_time", dny.Ts)
+                .Column("min_lat", long.Parse(dny.Y1))
+                .Column("max_lat", long.Parse(dny.Y2))
+                .Column("min_long", long.Parse(dny.X0))
+                .Column("max_long", long.Parse(dny.X1))
+                .Column("trains_count", long.Parse(dny.N))
+                .At(timestamp);
+
+            foreach (DnyTrain train in dny.T)
             {
-                TlsMode mode = BaseAddress.Scheme == "https" ? TlsMode.Enable : TlsMode.Disable;
-                using LineTcpSender ls = await LineTcpSender.ConnectAsync(BaseAddress.Host, BaseAddress.Port, tlsMode: mode);
+                ls.Table("dny_trains")
+                    .Symbol("train_id", train.I)
+                    .Symbol("date", ParseHelper.ParseDate(train.R).ToString("yyyy-MM-dd"))
+                    .Symbol("name", train.N)
+                    .Symbol("destination", train.L)
+                    .Column("dny_id", dnyId)
+                    .Column("lat", long.Parse(train.X))
+                    .Column("long", long.Parse(train.Y))
+                    .Column("direction", long.Parse(train.D))
+                    .Column("product_class", long.Parse(train.C));
 
-                string dnyId = Guid.NewGuid().ToString();
-                ls.Table("dnys")
-                    .Symbol("scraper_id", ScraperId)
-                    .Column("id", dnyId)
-                    .Column("local_time", dny.Ts)
-                    .Column("min_lat", long.Parse(dny.Y1))
-                    .Column("max_lat", long.Parse(dny.Y2))
-                    .Column("min_long", long.Parse(dny.X0))
-                    .Column("max_long", long.Parse(dny.X1))
-                    .Column("trains_count", long.Parse(dny.N))
-                    .At(timestamp);
-
-                foreach (DnyTrain train in dny.T)
+                if (!string.IsNullOrEmpty(train.Rt))
                 {
-                    ls.Table("dny_trains")
-                        .Symbol("train_id", train.I)
-                        .Symbol("date", ParseHelper.ParseDate(train.R).ToString("yyyy-MM-dd"))
-                        .Symbol("name", train.N)
-                        .Symbol("destination", train.L)
-                        .Column("dny_id", dnyId)
-                        .Column("lat", long.Parse(train.X))
-                        .Column("long", long.Parse(train.Y))
-                        .Column("direction", long.Parse(train.D))
-                        .Column("product_class", long.Parse(train.C));
-
-                    if (!string.IsNullOrEmpty(train.Rt))
-                    {
-                        ls.Column("delay", long.Parse(train.Rt));
-                    }
-
-                    ls.At(timestamp);
+                    ls.Column("delay", long.Parse(train.Rt));
                 }
 
-                await ls.SendAsync();
+                ls.At(timestamp);
+            }
 
-                return true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-                return false;
-            }
+            await ls.SendAsync();
         }
 
         public void Dispose()

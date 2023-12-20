@@ -6,6 +6,6 @@ namespace TrainScrapingWorkerService.Services
     {
         Task<bool> Ping();
 
-        Task<bool> PostDny(DnyPost dny, DateTime timestamp);
+        Task PostDny(DnyPost dny, DateTime timestamp);
     }
 }

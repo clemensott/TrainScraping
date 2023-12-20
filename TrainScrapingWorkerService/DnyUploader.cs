@@ -90,7 +90,11 @@ namespace TrainScrapingWorkerService
                     string json = File.ReadAllText(file);
                     Dny? dny = JsonConvert.DeserializeObject<Dny>(json);
 
-                    if (dny != null && await api.PostDny(dny, timestamp)) MoveFileToArchive(dnyConfig, file);
+                    if (dny != null)
+                    {
+                        await api.PostDny(dny, timestamp);
+                        MoveFileToArchive(dnyConfig, file);
+                    }
                     else MoveFileToError(dnyConfig, file);
                     break;
                 }

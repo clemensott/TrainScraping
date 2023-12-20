@@ -30,10 +30,8 @@ namespace TrainScrapingWorkerService.Services
             return client.PingAsync();
         }
 
-        public async Task<bool> PostDny(DnyPost dny, DateTime timestamp)
+        public async Task PostDny(DnyPost dny, DateTime timestamp)
         {
-            try
-            {
                 WriteApiAsync writeApi = client.GetWriteApiAsync();
                 List<PointData> points = new List<PointData>();
 
@@ -69,13 +67,6 @@ namespace TrainScrapingWorkerService.Services
                 }
 
                 await writeApi.WritePointsAsync(points, Bucket, Org);
-
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
         }
 
         public void Dispose()
