@@ -32,41 +32,41 @@ namespace TrainScrapingWorkerService.Services
 
         public async Task PostDny(DnyPost dny, DateTime timestamp)
         {
-                WriteApiAsync writeApi = client.GetWriteApiAsync();
-                List<PointData> points = new List<PointData>();
+            WriteApiAsync writeApi = client.GetWriteApiAsync();
+            List<PointData> points = new List<PointData>();
 
-                string dnyId = Guid.NewGuid().ToString();
-                PointData dnyMeasurement = PointData.Measurement("dny")
-                    .Tag("scraper_id", ScraperId)
-                    .Field("id", dnyId)
-                    .Field("local_time", dny.Ts)
-                    .Field("min_lat", int.Parse(dny.Y1))
-                    .Field("max_lat", int.Parse(dny.Y2))
-                    .Field("min_long", int.Parse(dny.X0))
-                    .Field("max_long", int.Parse(dny.X1))
-                    .Field("trains_count", int.Parse(dny.N))
+            string dnyId = Guid.NewGuid().ToString();
+            PointData dnyMeasurement = PointData.Measurement("dny")
+                .Tag("scraper_id", ScraperId)
+                .Field("id", dnyId)
+                .Field("local_time", dny.Ts)
+                .Field("min_lat", int.Parse(dny.Y1))
+                .Field("max_lat", int.Parse(dny.Y2))
+                .Field("min_long", int.Parse(dny.X0))
+                .Field("max_long", int.Parse(dny.X1))
+                .Field("trains_count", int.Parse(dny.N))
+                .Timestamp(timestamp, WritePrecision.S);
+            points.Add(dnyMeasurement);
+
+            foreach (DnyTrain train in dny.T)
+            {
+                PointData trainMeasurement = PointData.Measurement("dny_train")
+                    .Tag("name", train.N)
+                    .Tag("destination", train.L)
+                    .Tag("train_id", train.I)
+                    .Field("dny_id", dnyId)
+                    .Field("lat", int.Parse(train.X))
+                    .Field("long", int.Parse(train.Y))
+                    .Field("direction", int.Parse(train.D))
+                    .Field("product_class", int.Parse(train.C))
+                    .Field("date", ParseHelper.ParseDate(train.R).ToString("yyyy-MM-dd"))
+                    .Field("delay", string.IsNullOrEmpty(train.Rt) ? null : int.Parse(train.Rt))
                     .Timestamp(timestamp, WritePrecision.S);
-                points.Add(dnyMeasurement);
 
-                foreach (DnyTrain train in dny.T)
-                {
-                    PointData trainMeasurement = PointData.Measurement("dny_train")
-                        .Tag("name", train.N)
-                        .Tag("destination", train.L)
-                        .Field("train_id", train.I)
-                        .Field("dny_id", dnyId)
-                        .Field("lat", int.Parse(train.X))
-                        .Field("long", int.Parse(train.Y))
-                        .Field("direction", int.Parse(train.D))
-                        .Field("product_class", int.Parse(train.C))
-                        .Field("date", ParseHelper.ParseDate(train.R).ToString("yyyy-MM-dd"))
-                        .Field("delay", string.IsNullOrEmpty(train.Rt) ? null : int.Parse(train.Rt))
-                        .Timestamp(timestamp, WritePrecision.S);
+                points.Add(trainMeasurement);
+            }
 
-                    points.Add(trainMeasurement);
-                }
-
-                await writeApi.WritePointsAsync(points, Bucket, Org);
+            await writeApi.WritePointsAsync(points, Bucket, Org);
         }
 
         public void Dispose()
