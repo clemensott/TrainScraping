@@ -48,25 +48,20 @@ namespace TrainScrapingWorkerService.Services
                 .Timestamp(timestamp, WritePrecision.S);
             points.Add(dnyMeasurement);
 
-            IDictionary<string, IDictionary<string, DateTime>> nameTimestamps = new Dictionary<string, IDictionary<string, DateTime>>();
+            IDictionary<string, int> simultaneousTrainIndexes = new Dictionary<string, int>();
             foreach (DnyTrain train in dny.T)
             {
-                if (!nameTimestamps.TryGetValue(train.N, out var destinationTimestamps))
-                {
-                    destinationTimestamps = new Dictionary<string, DateTime>();
-                    nameTimestamps.Add(train.N, destinationTimestamps);
-                }
-
-                // Workaround: If a train with same name and destination exists in DNY than change timestamp
-                // because it would override previous entries in InfluxDB because of equal Tags
-                if (destinationTimestamps.TryGetValue(train.L, out var sendTimestamp)) sendTimestamp = sendTimestamp.AddSeconds(1);
-                else sendTimestamp = timestamp;
-
-                destinationTimestamps[train.L] = sendTimestamp;
+                string tagKey = $"{train.N}|{train.L}";
+                if (simultaneousTrainIndexes.TryGetValue(tagKey, out int trainIndex)) trainIndex++;
+                else trainIndex = 0;
+                simultaneousTrainIndexes[tagKey] = trainIndex;
 
                 PointData trainMeasurement = PointData.Measurement("dny_train")
                     .Tag("name", train.N)
                     .Tag("destination", train.L)
+                    // Workaround: If a train with same name and destination exists in DNY than change index
+                    // because it would override previous entries in InfluxDB because of equal Tags
+                    .Tag("index", trainIndex.ToString())
                     .Field("train_id", train.I)
                     .Field("dny_id", dnyId)
                     .Field("lat", int.Parse(train.X))
@@ -75,7 +70,7 @@ namespace TrainScrapingWorkerService.Services
                     .Field("product_class", int.Parse(train.C))
                     .Field("date", ParseHelper.ParseDate(train.R).ToString("yyyy-MM-dd"))
                     .Field("delay", string.IsNullOrEmpty(train.Rt) ? null : int.Parse(train.Rt))
-                    .Timestamp(sendTimestamp, WritePrecision.S);
+                    .Timestamp(timestamp, WritePrecision.S);
 
                 points.Add(trainMeasurement);
             }
